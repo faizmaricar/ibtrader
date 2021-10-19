@@ -50,13 +50,15 @@ class Bot:
         if hour == 8 and len(self.seven_am_one_hour_bar) > 0:
             high = max(self.seven_am_one_hour_bar)
             low = min(self.seven_am_one_hour_bar)
+            profit = 0.0040
+            stop = 0.0005
 
-            long_entry_bracket_order = Orders.BracketOrder(self.ib.nextValidId(1), 'BUY', self.quantity, high, high + 0.004, high - 0.001, 'ENTRY')
+            long_entry_bracket_order = Orders.BracketOrder(self.ib.nextValidId(1), 'BUY', self.quantity, high, high + profit, high - stop, 'ENTRY')
             
             for long_order in long_entry_bracket_order:
                 self.ib.placeOrder(long_order.orderId, self.contract, long_order)
             
-            short_entry_bracket_order = Orders.BracketOrder(self.ib.nextValidId(1), 'SELL', self.quantity, low, low - 0.004, low + 0.001, 'ENTRY')
+            short_entry_bracket_order = Orders.BracketOrder(self.ib.nextValidId(1), 'SELL', self.quantity, low, low - profit, low + stop, 'ENTRY')
             
             for short_order in short_entry_bracket_order:
                 self.ib.placeOrder(short_order.orderId, self.contract, short_order)
