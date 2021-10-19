@@ -14,12 +14,14 @@ class IBApi(App):
             bot.onBarUpdate(reqId, time, open, high, low, close, volume, wap, count)
         except Exception as e:
             print(e)
+    def reqIds(self, numIds: int):
+        return super().reqIds(numIds)
 
 class Bot:
     ib = None
     contract = None
     seven_am_one_hour_bar = []
-    quantity = 75000
+    quantity = 70000
 
     def __init__(self):
         self.ib = IBApi()
@@ -49,13 +51,16 @@ class Bot:
             high = max(self.seven_am_one_hour_bar)
             low = min(self.seven_am_one_hour_bar)
 
-            long_entry_bracket_order = Orders.BracketOrder(1, 'BUY', self.quantity, high, high + 0.004, high - 0.0003, high - 0.00001, 'ENTRY')
-            short_entry_bracket_order = Orders.BracketOrder(4, 'SELL', self.quantity, low, low - 0.004, low + 0.0003, low + 0.00001, 'ENTRY')
+            long_entry_bracket_order = Orders.BracketOrder(self.ib.nextValidId(1), 'BUY', self.quantity, high, high + 0.004, high - 0.001, 'ENTRY')
             
-            for order in long_entry_bracket_order:
-                self.ib.placeOrder(order.orderId, self.contract, order)
+            for long_order in long_entry_bracket_order:
+                self.ib.placeOrder(long_order.orderId, self.contract, long_order)
             
-            for order in short_entry_bracket_order:
-                self.ib.placeOrder(order.orderId, self.contract, order)
+            short_entry_bracket_order = Orders.BracketOrder(self.ib.nextValidId(1), 'SELL', self.quantity, low, low - 0.004, low + 0.001, 'ENTRY')
+            
+            for short_order in short_entry_bracket_order:
+                self.ib.placeOrder(short_order.orderId, self.contract, short_order)
+        
+            self.seven_am_one_hour_bar = []
 
 bot = Bot()

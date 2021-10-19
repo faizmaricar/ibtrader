@@ -5,36 +5,64 @@ class Orders:
     @staticmethod
     def BracketOrder(parentOrderId:int, action:str, quantity:float, 
                      limitPrice:float, takeProfitLimitPrice:float, 
-                     stopLossPrice:float, lmtPriceOffset: float, parentOcaGroup: str):
+                     stopLossPrice:float, parentOcaGroup: str):
+
+        brackerOrderAction = "SELL" if action == "BUY" else "BUY"
     
-        parent = Order()
+        parent = Orders.LimitOrder(action, quantity, limitPrice)
         parent.orderId = parentOrderId
-        parent.action = action
-        parent.orderType = "LMT"
-        parent.totalQuantity = quantity
-        parent.lmtPrice = limitPrice
         parent.ocaType = 1
         parent.ocaGroup = parentOcaGroup
         parent.transmit = False
 
-        takeProfit = Order()
+        takeProfit = Orders.LimitOrder(brackerOrderAction, quantity, takeProfitLimitPrice)
         takeProfit.orderId = parent.orderId + 1
-        takeProfit.action = "SELL" if action == "BUY" else "BUY"
-        takeProfit.orderType = "LMT"
-        takeProfit.totalQuantity = quantity
-        takeProfit.lmtPrice = takeProfitLimitPrice
         takeProfit.parentId = parentOrderId
         takeProfit.transmit = False
 
-        stopLoss = Order()
+        stopLoss = Orders.TrailingStop(brackerOrderAction, quantity, 0.1, stopLossPrice)
         stopLoss.orderId = parent.orderId + 2
-        stopLoss.action = "SELL" if action == "BUY" else "BUY"
-        stopLoss.orderType = "TRAIL LIMIT"
-        stopLoss.auxPrice = stopLossPrice
-        stopLoss.lmtPriceOffset = lmtPriceOffset
-        stopLoss.totalQuantity = quantity
         stopLoss.parentId = parentOrderId
         stopLoss.transmit = True
 
         bracketOrder = [parent, takeProfit, stopLoss]
+        
         return bracketOrder
+
+    @staticmethod
+    def LimitOrder(action:str, quantity:float, limitPrice:float):
+    
+        order = Order()
+        order.action = action
+        order.orderType = "LMT"
+        order.totalQuantity = quantity
+        order.lmtPrice = limitPrice
+
+        return order
+
+    @staticmethod
+    def TrailingStop(action:str, quantity:float, trailingPercent:float,
+                     trailStopPrice:float):
+    
+        order = Order()
+        order.action = action
+        order.orderType = "TRAIL"
+        order.totalQuantity = quantity
+        order.trailingPercent = trailingPercent
+        order.trailStopPrice = trailStopPrice
+
+        return order
+
+    @staticmethod
+    def TrailingStopLimit(action:str, quantity:float, lmtPriceOffset:float, 
+                          trailingAmount:float, trailStopPrice:float):
+    
+        order = Order()
+        order.action = action
+        order.orderType = "TRAIL LIMIT"
+        order.totalQuantity = quantity
+        order.trailStopPrice = trailStopPrice
+        order.lmtPriceOffset = lmtPriceOffset
+        order.auxPrice = trailingAmount
+
+        return order
