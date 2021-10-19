@@ -1,6 +1,9 @@
 import threading
 import time
+import math
 from datetime import datetime
+
+from ibapi.common import ListOfPriceIncrements
 
 from app import App
 from contracts import Contracts
@@ -16,6 +19,13 @@ class IBApi(App):
             print(e)
     def reqIds(self, numIds: int):
         return super().reqIds(numIds)
+
+    def marketRule(self, marketRuleId: int, priceIncrements: ListOfPriceIncrements):
+        super().marketRule(marketRuleId, priceIncrements)
+        print("Market Rule ID: ", marketRuleId)
+        
+        for priceIncrement in priceIncrements:
+            print("Price Increment.", priceIncrement)
 
 class Bot:
     ib = None
@@ -48,21 +58,21 @@ class Bot:
             self.seven_am_one_hour_bar.append(close)
         
         if hour == 8 and len(self.seven_am_one_hour_bar) > 0:
-            high = max(self.seven_am_one_hour_bar)
-            low = min(self.seven_am_one_hour_bar)
-            profit = 0.0040
+            high = round(max(self.seven_am_one_hour_bar), 5)
+            low = round(min(self.seven_am_one_hour_bar), 5)
+            profit = 0.004
             stop = 0.0005
 
-            long_entry_bracket_order = Orders.BracketOrder(self.ib.nextValidId(1), 'BUY', self.quantity, high, high + profit, high - stop, 'ENTRY')
+            long_entry_bracket_order = Orders.BracketOrder(1, 'BUY', self.quantity, high, high + profit, high - stop, 'ENTRY')
             
             for long_order in long_entry_bracket_order:
                 self.ib.placeOrder(long_order.orderId, self.contract, long_order)
             
-            short_entry_bracket_order = Orders.BracketOrder(self.ib.nextValidId(1), 'SELL', self.quantity, low, low - profit, low + stop, 'ENTRY')
+            short_entry_bracket_order = Orders.BracketOrder(4, 'SELL', self.quantity, low, low - profit, low + stop, 'ENTRY')
             
             for short_order in short_entry_bracket_order:
                 self.ib.placeOrder(short_order.orderId, self.contract, short_order)
         
-            self.seven_am_one_hour_bar = []
+            self.seven_am_one_hour_bar.clear()
 
 bot = Bot()
