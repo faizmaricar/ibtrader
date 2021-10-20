@@ -8,14 +8,14 @@ class Orders:
                      stopLossPrice:float, parentOcaGroup: str):
 
         brackerOrderAction = "SELL" if action == "BUY" else "BUY"
-    
-        parent = Orders.LimitOrder(action, quantity, limitPrice)
+
+        parent = Orders.LimitIfTouchedOrder(action, quantity, limitPrice)
         parent.orderId = parentOrderId
         parent.ocaType = 1
         parent.ocaGroup = parentOcaGroup
         parent.transmit = False
 
-        takeProfit = Orders.LimitOrder(brackerOrderAction, quantity, takeProfitLimitPrice)
+        takeProfit = Orders.LimitIfTouchedOrder(brackerOrderAction, quantity, takeProfitLimitPrice)
         takeProfit.orderId = parent.orderId + 1
         takeProfit.parentId = parentOrderId
         takeProfit.transmit = False
@@ -37,6 +37,14 @@ class Orders:
         order.orderType = "LMT"
         order.totalQuantity = quantity
         order.lmtPrice = limitPrice
+
+        return order
+    
+    def LimitIfTouchedOrder(action:str, quantity:float, limitPrice:float):
+        triggerPrice = limitPrice - 0.00001 if action == 'BUY' else limitPrice + 0.00001
+        order = Orders.LimitOrder(action, quantity, limitPrice)
+        order.orderType = "LIT"
+        order.auxPrice = triggerPrice
 
         return order
 
