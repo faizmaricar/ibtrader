@@ -1,6 +1,13 @@
 from ibapi.order import *
 
 class Orders:
+    @staticmethod
+    def Order(action:str, quantity:float):
+        order = Order()
+        order.action = action
+        order.totalQuantity = quantity
+
+        return order
 
     @staticmethod
     def BracketOrder(parentOrderId:int, action:str, quantity:float, 
@@ -31,11 +38,8 @@ class Orders:
 
     @staticmethod
     def LimitOrder(action:str, quantity:float, limitPrice:float):
-    
-        order = Order()
-        order.action = action
+        order = Orders.Order(action, quantity)
         order.orderType = "LMT"
-        order.totalQuantity = quantity
         order.lmtPrice = limitPrice
 
         return order
@@ -52,10 +56,8 @@ class Orders:
     def TrailingStop(action:str, quantity:float, trailingPercent:float,
                      trailStopPrice:float):
     
-        order = Order()
-        order.action = action
+        order = Orders.Order(action, quantity)
         order.orderType = "TRAIL"
-        order.totalQuantity = quantity
         order.trailingPercent = trailingPercent
         order.trailStopPrice = trailStopPrice
 
@@ -65,10 +67,8 @@ class Orders:
     def TrailingStopLimit(action:str, quantity:float, lmtPriceOffset:float, 
                           trailingAmount:float, trailStopPrice:float):
     
-        order = Order()
-        order.action = action
+        order = Orders.Order(action, quantity)
         order.orderType = "TRAIL LIMIT"
-        order.totalQuantity = quantity
         order.trailStopPrice = trailStopPrice
         order.lmtPriceOffset = lmtPriceOffset
         order.auxPrice = trailingAmount
