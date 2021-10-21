@@ -2,6 +2,10 @@ from ibapi.order import *
 
 class Orders:
     @staticmethod
+    def Pip(n: float):
+        return n * 0.0001
+    
+    @staticmethod
     def Order(action:str, quantity:float):
         order = Order()
         order.action = action
@@ -22,7 +26,7 @@ class Orders:
         parent.ocaGroup = parentOcaGroup
         parent.transmit = False
 
-        takeProfit = Orders.LimitIfTouchedOrder(brackerOrderAction, quantity, takeProfitLimitPrice)
+        takeProfit = Orders.LimitOrder(brackerOrderAction, quantity, takeProfitLimitPrice)
         takeProfit.orderId = parent.orderId + 1
         takeProfit.parentId = parentOrderId
         takeProfit.transmit = False
@@ -45,7 +49,8 @@ class Orders:
         return order
     
     def LimitIfTouchedOrder(action:str, quantity:float, limitPrice:float):
-        triggerPrice = limitPrice - 0.0001 if action == 'BUY' else limitPrice + 0.0001
+        triggerGap = Orders.Pip(1)
+        triggerPrice = limitPrice + triggerGap if action == 'BUY' else limitPrice - triggerGap
         order = Orders.LimitOrder(action, quantity, limitPrice)
         order.orderType = "LIT"
         order.auxPrice = triggerPrice

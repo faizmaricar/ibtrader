@@ -9,6 +9,13 @@ from contracts import Contracts
 from orders import Orders
 
 class IBApi(App):
+    def nextValidId(self, orderId: float):
+        super().nextValidId(orderId)
+        try:
+            bot.onValidIdUpdate(orderId)
+        except Exception as e:
+            print(e)
+
     def historicalDataUpdate(self, reqId: int, bar: BarData):
         super().historicalDataUpdate(reqId, bar)
         try:
@@ -23,6 +30,7 @@ class Bot:
     low = None
     quantity = 70000
     trade = True
+    nextValidId = None
 
     def __init__(self):
         self.ib = IBApi()
@@ -35,12 +43,17 @@ class Bot:
         
         # Setup EUR/USD contract
         self.contract = Contracts.EurUsdFx()
+        
+        self.ib.reqIds(-1)
 
         self.ib.reqHistoricalData(4102, self.contract, '', "1 D", "1 hour", "MIDPOINT", 1, 1, True, [])
 
     def run_loop(self):
         self.ib.run()
     
+    def onValidIdUpdate (self, orderId):
+        self.nextValidId = orderId
+
     def onHistoricalUpdate(self, reqId, bar):
         print(bar)
         hour = datetime.strptime(bar.date, '%Y%m%d %H:%M:%S').utcnow().hour
@@ -59,12 +72,12 @@ class Bot:
             short_TP_price = self.low - profit
             short_SL_price = self.low + stop
 
-            long_entry_bracket_order = Orders.BracketOrder(1, 'BUY', self.quantity, self.high, long_TP_price, long_SL_price, 'ENTRY')
+            long_entry_bracket_order = Orders.BracketOrder(self.nextValidId, 'BUY', self.quantity, self.high, long_TP_price, long_SL_price, 'ENTRY')
             
             for long_order in long_entry_bracket_order:
                 self.ib.placeOrder(long_order.orderId, self.contract, long_order)
             
-            short_entry_bracket_order = Orders.BracketOrder(4, 'SELL', self.quantity, self.low, short_TP_price, short_SL_price, 'ENTRY')
+            short_entry_bracket_order = Orders.BracketOrder(self.nextValidId + 3, 'SELL', self.quantity, self.low, short_TP_price, short_SL_price, 'ENTRY')
             
             for short_order in short_entry_bracket_order:
                 self.ib.placeOrder(short_order.orderId, self.contract, short_order)
