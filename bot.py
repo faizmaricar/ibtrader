@@ -1,8 +1,8 @@
 import threading
 import time
-from datetime import datetime
 
-from ibapi.common import BarData, ListOfPriceIncrements
+from datetime import datetime
+from ibapi.common import BarData
 
 from app import App
 from contracts import Contracts
@@ -16,22 +16,13 @@ class IBApi(App):
         except Exception as e:
             print(e)
 
-    def reqIds(self, numIds: int):
-        return super().reqIds(numIds)
-
-    def marketRule(self, marketRuleId: int, priceIncrements: ListOfPriceIncrements):
-        super().marketRule(marketRuleId, priceIncrements)
-        print("Market Rule ID: ", marketRuleId)
-        
-        for priceIncrement in priceIncrements:
-            print("Price Increment.", priceIncrement)
-
 class Bot:
     ib = None
     contract = None
     high = None
     low = None
     quantity = 70000
+    trade = True
 
     def __init__(self):
         self.ib = IBApi()
@@ -52,17 +43,15 @@ class Bot:
     
     def onHistoricalUpdate(self, reqId, bar):
         print(bar)
-
         hour = datetime.strptime(bar.date, '%Y%m%d %H:%M:%S').utcnow().hour
-        trade = True
 
         if hour == 7:
-            self.high = round(bar.high, 6)
-            self.low = round(bar.low, 6)
+            self.high = round(bar.high, 5)
+            self.low = round(bar.low, 5)
         
-        if hour == 8 and trade:
+        if hour == 8 and self.trade:
             profit = 0.004
-            stop = 0.0001
+            stop = 0.001
 
             long_TP_price = self.high + profit
             long_SL_price = self.high - stop
@@ -80,6 +69,6 @@ class Bot:
             for short_order in short_entry_bracket_order:
                 self.ib.placeOrder(short_order.orderId, self.contract, short_order)
             
-            trade = False
+            self.trade = False
 
 bot = Bot()

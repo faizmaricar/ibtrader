@@ -45,7 +45,7 @@ class Orders:
         return order
     
     def LimitIfTouchedOrder(action:str, quantity:float, limitPrice:float):
-        triggerPrice = limitPrice - 0.00001 if action == 'BUY' else limitPrice + 0.00001
+        triggerPrice = limitPrice - 0.0001 if action == 'BUY' else limitPrice + 0.0001
         order = Orders.LimitOrder(action, quantity, limitPrice)
         order.orderType = "LIT"
         order.auxPrice = triggerPrice
