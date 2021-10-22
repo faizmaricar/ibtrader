@@ -4,9 +4,9 @@ import time
 from datetime import datetime
 from ibapi.common import BarData
 
-from app import App
-from contracts import Contracts
-from orders import Orders
+from src.app import App
+from src.contracts import Contracts
+from src.orders import Orders
 
 class IBApi(App):
     def nextValidId(self, orderId: float):

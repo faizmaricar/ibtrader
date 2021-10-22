@@ -1,8 +1,9 @@
 from ibapi.common import OrderId
 from ibapi.contract import Contract
 from ibapi.order import Order
-from wrapper import Wrapper
-from client import Client
+
+from .wrapper import Wrapper
+from .client import Client
 
 class App(Wrapper, Client):
     def __init__(self):

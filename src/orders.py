@@ -20,7 +20,7 @@ class Orders:
 
         brackerOrderAction = "SELL" if action == "BUY" else "BUY"
 
-        parent = Orders.LimitIfTouchedOrder(action, quantity, limitPrice)
+        parent = Orders.MarketIfTouched(action, quantity, limitPrice)
         parent.orderId = parentOrderId
         parent.ocaType = 1
         parent.ocaGroup = parentOcaGroup
@@ -54,6 +54,13 @@ class Orders:
         order = Orders.LimitOrder(action, quantity, limitPrice)
         order.orderType = "LIT"
         order.auxPrice = triggerPrice
+
+        return order
+    @staticmethod
+    def MarketIfTouched(action:str, quantity: float, price: float):
+        order = Orders.Order(action, quantity)
+        order.orderType = "MIT"
+        order.auxPrice = price
 
         return order
 
