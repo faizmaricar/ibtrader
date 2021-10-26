@@ -49,7 +49,7 @@ class Orders:
         return order
     
     def LimitIfTouchedOrder(action:str, quantity:float, limitPrice:float):
-        triggerGap = Orders.Pip(1)
+        triggerGap = Orders.Pip(2)
         triggerPrice = limitPrice + triggerGap if action == 'BUY' else limitPrice - triggerGap
         order = Orders.LimitOrder(action, quantity, limitPrice)
         order.orderType = "LIT"
